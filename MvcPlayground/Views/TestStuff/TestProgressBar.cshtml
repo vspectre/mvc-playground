@@ -1,0 +1,83 @@
+﻿@{
+    ViewBag.Title = "Test Progress Bar";
+    Layout = "~/Views/Shared/_Modal.cshtml";
+
+    var testOpt = new AjaxOptions
+    {
+        UpdateTargetId = "results",
+        InsertionMode = InsertionMode.Replace,
+        HttpMethod = "POST",
+        Url = Url.Action("TestProgress"),
+        OnBegin = "startTest",
+        OnComplete = "endTest",
+        OnFailure = "validationError",
+        OnSuccess = "testResults"
+    };
+}
+
+<script type="text/javascript">
+    function testResults(data, status, xhr) {
+        var addClass;
+        var removeClass;
+        if (data != "") {
+            $('#results').removeClass('hidden');
+            addClass = "validation-summary-valid";
+            removeClass = "validation-summary-errors inline";
+        }
+        else {
+            addClass = "validation-summary-errors inline";
+            removeClass = "validation-summary-valid";
+        }
+
+        $('#validationSummary').removeClass(removeClass).addClass(addClass);
+    }
+
+    function validationError(data, status, xhr) {
+        // do nothing right now
+    }
+
+    function startTest() {
+        $('#loading-alert').removeClass('invisible');
+        startProgress();
+    }
+
+    function endTest() {
+        endProgress();
+        $('#loading-alert').addClass('invisible');
+    }
+</script>
+
+@section ModalTitle {
+    <span>TestProgressBar</span>
+}
+
+
+<div class="center-block">
+    <button type="button" class="btn btn-lg btn-block btn-info" onclick="startTest">Start</button>
+    <button type="button" class="btn btn-lg btn-block" onclick="endTest">End</button>
+</div>
+
+@using (Ajax.BeginForm("TestSearch", "TestStuff", testOpt))
+{
+    <button type="submit" class="btn btn-danger">Search</button>
+    @Html.ValidationSummary(false, "A value is necessary.", new { id = "validationSummary" })
+}
+
+
+<div id="loading-alert" class="invisible">
+    <h3>Please Wait...</h3>
+    @Html.Partial("ProgressBar")
+</div>
+
+<hr />
+
+<div id="results" class="hidden">
+    <h4>Test Results go here!</h4>
+</div>
+
+@section ModalFooter {
+    <div class="btn-group pull-right">
+        <button type="button" name="done" class="btn btn-primary"  onclick="hideModal()">Done</button>
+        <button type="button" name="cancel" class="btn" onclick="hideModal()">Cancel</button>
+    </div>
+}
